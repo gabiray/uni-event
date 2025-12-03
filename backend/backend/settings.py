@@ -12,6 +12,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 
+# 29.11.25 Importuri noi.
+from datetime import timedelta # For setting token expiration times
+from dotenv import load_dotenv # For loading environment variables from a .env file
+import os # For accessing environment variables
+
+load_dotenv()  # Load environment variables from a .env file if present
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,8 +32,35 @@ SECRET_KEY = 'django-insecure-xk%$r+1!8c1pqs)(4rm9e)gl6k4fvs1y#mh3=us+0yu@aoz@px
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"] # 29.11.25 Set to allow all hosts for development purposes.
 
+# 29.11.25 Django REST Framework configuration
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+      "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+      "rest_framework.permissions.IsAuthenticated",
+    ),
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
+
+# Swagger: butonul Authorize (Bearer token)
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Bearer": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization",
+            "description": "Pune aici: Bearer <JWT token>"
+        }
+    },
+    "USE_SESSION_AUTH": False,
+}
 
 # Application definition
 
@@ -37,9 +71,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "users",  # 29.11.25 Custom user app
+    "events",  # 29.11.25 Events app
+    "interactions",  # 29.11.25 Interactions app
+    "rest_framework",  # 29.11.25 Added for Django REST Framework
+    "corsheaders",  # 29.11.25 Added for handling CORS
+    "django_filters",  # 29.11.25 Added for filtering support
+    "drf_yasg",  # 29.11.25 Added for API documentation
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # 29.11.25 CORS middleware
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -120,3 +162,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CORS_ALLOW_ALL_ORIGINS = True  # 29.11.25 Allow all origins for CORS (development only)
+CORS_ALLOWS_CREDENTIALS = True  # 29.11.25 Allow cookies to be included in cross-site HTTP requests
+AUTH_USER_MODEL = 'users.CustomUser' # 29.11.25 Use custom user model
